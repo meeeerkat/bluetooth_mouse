@@ -90,10 +90,9 @@ void bt_hid_task(void *pvParameters)
 {
     // first thing done is initialising touch_pad
     init_inputs();
+    ESP_LOGI("INPUTS", "Ready to take inputs");
 
     esp_hidd_dev_t *hid_dev = pvParameters;
-
-    printf("wasdqe, type something\n");
 
     static uint8_t buffer[4] = {0};
     RESET_BUFFER
@@ -112,32 +111,6 @@ void bt_hid_task(void *pvParameters)
             buffer[2] -= 10;
         if (s_pad_activated[CONFIG_DOWN_KEY_TOUCH_IO])
             buffer[2] += 10;
-
-        /*
-        char c = fgetc(stdin);
-        switch (c) {
-            case 'q':   // left click
-                buffer[0] = 1;
-                break;
-            case 'e':   // right click
-                buffer[0] = 2;
-                break;
-            case 'w':   // cursor goes up
-                buffer[2] = -10;
-                break;
-            case 'a':   // cursor goes left
-                buffer[1] = -10;
-                break;
-            case 's':   // cursor goes down
-                buffer[2] = 10;
-                break;
-            case 'd':   // cursor goes right
-                buffer[1] = 10;
-                break;
-            default:
-                break;
-        }
-        */
 
         if (buffer[0] != 0 || buffer[1] != 0 || buffer[2] != 0 || buffer[3] != 0) {
             esp_hidd_dev_input_set(hid_dev, 0, 0, buffer, 4);
