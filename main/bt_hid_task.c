@@ -40,30 +40,6 @@ static void init_touch_pad_thresholds(void)
 
 
 /*
-  Check if any of touch pads has been activated
-  by reading a table updated by rtc_intr()
-  If so, then print it out on a serial monitor.
-  Clear related entry in the table afterwards
-
-  In interrupt mode, the table is updated in touch ISR.
-static void input_read_task(void *pvParameter)
-{
-    while (1) {
-        if (s_pad_activated[TOUCH_IO] == true) {
-            gpio_set_level(LED_GPIO, 1);
-            s_pad_activated[TOUCH_IO] = false;
-        }
-        else
-            gpio_set_level(LED_GPIO, 0);
-
-        // Wait a while for the pad being released
-        vTaskDelay(pdMS_TO_TICKS(REFRESH_INPUT_DELTA));
-    }
-
-}
- */
-
-/*
   Handle an interrupt triggered when a pad is touched.
   Recognize what pad has been touched and save it in a table.
  */
@@ -109,6 +85,7 @@ void init_inputs(void)
 }
 
 #define RESET_BUFFER for (int i = 0; i < 4; i++) buffer[i] = 0;
+#define RESET_PAD_ACTIVATED for (int i=0; i < TOUCH_PAD_MAX; i++) s_pad_activated[i] = false;
 void bt_hid_task(void *pvParameters)
 {
     // first thing done is initialising touch_pad
@@ -120,11 +97,21 @@ void bt_hid_task(void *pvParameters)
 
     static uint8_t buffer[4] = {0};
     RESET_BUFFER
+    RESET_PAD_ACTIVATED
 
     while (1) {
-        if (s_pad_activated[CONFIG_UP_KEY_TOUCH_IO] == true)
-            buffer[2] = -10;
-        s_pad_activated[CONFIG_UP_KEY_TOUCH_IO] = false;
+        if (s_pad_activated[CONFIG_LEFT_CLICK_TOUCH_IO])
+            buffer[0] = 1;
+        if (s_pad_activated[CONFIG_RIGHT_CLICK_TOUCH_IO])
+            buffer[0] = 2;
+        if (s_pad_activated[CONFIG_LEFT_KEY_TOUCH_IO])
+            buffer[1] -= 10;
+        if (s_pad_activated[CONFIG_RIGHT_KEY_TOUCH_IO])
+            buffer[1] += 10;
+        if (s_pad_activated[CONFIG_UP_KEY_TOUCH_IO])
+            buffer[2] -= 10;
+        if (s_pad_activated[CONFIG_DOWN_KEY_TOUCH_IO])
+            buffer[2] += 10;
 
         /*
         char c = fgetc(stdin);
@@ -156,6 +143,7 @@ void bt_hid_task(void *pvParameters)
             esp_hidd_dev_input_set(hid_dev, 0, 0, buffer, 4);
             RESET_BUFFER
         }
+        RESET_PAD_ACTIVATED
 
         vTaskDelay(pdMS_TO_TICKS(CONFIG_REFRESH_INPUT_DELTA));
     }

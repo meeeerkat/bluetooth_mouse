@@ -1,9 +1,34 @@
 menu "Touch keys config"
 
-    config UP_KEY_TOUCH_IO
-        int "UP KEY TOUCH IO number"
+    config LEFT_CLICK_TOUCH_IO
+        int "Left click TOUCH IO number"
         range 0 9
         default 0
+
+    config RIGHT_CLICK_TOUCH_IO
+        int "Right click TOUCH IO number"
+        range 0 9
+        default 2
+
+    config UP_KEY_TOUCH_IO
+        int "Up key TOUCH IO number"
+        range 0 9
+        default 4
+
+    config DOWN_KEY_TOUCH_IO
+        int "Down key TOUCH IO number"
+        range 0 9
+        default 5
+
+    config LEFT_KEY_TOUCH_IO
+        int "Left key TOUCH IO number"
+        range 0 9
+        default 6
+
+    config RIGHT_KEY_TOUCH_IO
+        int "Right key TOUCH IO number"
+        range 0 9
+        default 7
 
     config REFRESH_INPUT_DELTA
         int "Time between input refresh in ms"
