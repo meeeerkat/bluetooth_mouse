@@ -3,6 +3,6 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := esp_hid_device
+PROJECT_NAME := bluetooth_super_mouse
 
 include $(IDF_PATH)/make/project.mk
