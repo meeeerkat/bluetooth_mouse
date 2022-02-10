@@ -1,0 +1,13 @@
+menu "Touch keys config"
+
+    config UP_KEY_TOUCH_IO
+        int "UP KEY TOUCH IO number"
+        range 0 9
+        default 0
+
+    config REFRESH_INPUT_DELTA
+        int "Time between input refresh in ms"
+        range 0 1000
+        default 50
+
+endmenu
