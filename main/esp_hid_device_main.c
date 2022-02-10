@@ -29,6 +29,8 @@
 #include "esp_hidd.h"
 #include "esp_hid_gap.h"
 
+#include "bt_hid_task.h"
+
 static const char *TAG = "HID_DEV_DEMO";
 
 typedef struct
@@ -92,66 +94,9 @@ static esp_hid_device_config_t bt_hid_config = {
     .report_maps_len    = 1
 };
 
-// send the buttons, change in x, and change in y
-void send_mouse(uint8_t buttons, char dx, char dy, char wheel)
-{
-    static uint8_t buffer[4] = {0};
-    buffer[0] = buttons;
-    buffer[1] = dx;
-    buffer[2] = dy;
-    buffer[3] = wheel;
-    esp_hidd_dev_input_set(s_bt_hid_param.hid_dev, 0, 0, buffer, 4);
-}
-
-void bt_hid_demo_task(void *pvParameters)
-{
-    static const char* help_string = "########################################################################\n"\
-    "BT hid mouse demo usage:\n"\
-    "You can input these value to simulate mouse: 'q', 'w', 'e', 'a', 's', 'd', 'h'\n"\
-    "q -- click the left key\n"\
-    "w -- move up\n"\
-    "e -- click the right key\n"\
-    "a -- move left\n"\
-    "s -- move down\n"\
-    "d -- move right\n"\
-    "h -- show the help\n"\
-    "########################################################################\n";
-    printf("%s\n", help_string);
-    char c;
-    while (1) {
-        c = fgetc(stdin);
-        switch (c) {
-        case 'q':
-            send_mouse(1, 0, 0, 0);
-            break;
-        case 'w':
-            send_mouse(0, 0, -10, 0);
-            break;
-        case 'e':
-            send_mouse(2, 0, 0, 0);
-            break;
-        case 'a':
-            send_mouse(0, -10, 0, 0);
-            break;
-        case 's':
-            send_mouse(0, 0, 10, 0);
-            break;
-        case 'd':
-            send_mouse(0, 10, 0, 0);
-            break;
-        case 'h':
-            printf("%s\n", help_string);
-            break;
-        default:
-            break;
-        }
-        vTaskDelay(10 / portTICK_PERIOD_MS);
-    }
-}
-
 void bt_hid_task_start_up(void)
 {
-    xTaskCreate(bt_hid_demo_task, "bt_hid_demo_task", 2 * 1024, NULL, configMAX_PRIORITIES - 3, &s_bt_hid_param.task_hdl);
+    xTaskCreate(bt_hid_task, "bt_hid_task", 2 * 1024, s_bt_hid_param.hid_dev, configMAX_PRIORITIES - 3, &s_bt_hid_param.task_hdl);
     return;
 }
 
