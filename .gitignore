@@ -1,6 +1,5 @@
 
-build/*
-!build/.gitkeep
+build
 
 sdkconfig
 sdkconfig.*
