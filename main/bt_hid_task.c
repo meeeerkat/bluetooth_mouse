@@ -84,7 +84,7 @@ void init_inputs(void)
     touch_pad_intr_enable();
 }
 
-#define RESET_BUFFER for (int i = 0; i < 4; i++) buffer[i] = 0;
+#define RESET_BUFFER for (int i=0; i < 4; i++) buffer[i] = 0;
 #define RESET_PAD_ACTIVATED for (int i=0; i < TOUCH_PAD_MAX; i++) s_pad_activated[i] = false;
 void bt_hid_task(void *pvParameters)
 {
@@ -95,10 +95,11 @@ void bt_hid_task(void *pvParameters)
     esp_hidd_dev_t *hid_dev = pvParameters;
 
     static uint8_t buffer[4] = {0};
-    RESET_BUFFER
-    RESET_PAD_ACTIVATED
 
     while (1) {
+        bool last_command_wasnt_empty = buffer[0] != 0 || buffer[1] != 0 || buffer[2] != 0 || buffer[3] != 0;
+        RESET_BUFFER
+
         if (s_pad_activated[CONFIG_LEFT_CLICK_TOUCH_IO])
             buffer[0] = 1;
         if (s_pad_activated[CONFIG_RIGHT_CLICK_TOUCH_IO])
@@ -112,10 +113,10 @@ void bt_hid_task(void *pvParameters)
         if (s_pad_activated[CONFIG_DOWN_KEY_TOUCH_IO])
             buffer[2] += 10;
 
-        if (buffer[0] != 0 || buffer[1] != 0 || buffer[2] != 0 || buffer[3] != 0) {
+        if (buffer[0] != 0 || buffer[1] != 0 || buffer[2] != 0 || buffer[3] != 0
+                || last_command_wasnt_empty)
             esp_hidd_dev_input_set(hid_dev, 0, 0, buffer, 4);
-            RESET_BUFFER
-        }
+
         RESET_PAD_ACTIVATED
 
         vTaskDelay(pdMS_TO_TICKS(CONFIG_REFRESH_INPUT_DELTA));
