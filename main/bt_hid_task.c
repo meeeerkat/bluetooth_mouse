@@ -94,16 +94,15 @@ void bt_hid_task(void *pvParameters)
 
     esp_hidd_dev_t *hid_dev = pvParameters;
 
-    static uint8_t buffer[4] = {0};
+    bool was_last_command_empty = true;
 
     while (1) {
-        bool last_command_wasnt_empty = buffer[0] != 0 || buffer[1] != 0 || buffer[2] != 0 || buffer[3] != 0;
-        RESET_BUFFER
+        uint8_t buffer[4] = {0};
 
         if (s_pad_activated[CONFIG_LEFT_CLICK_TOUCH_IO])
-            buffer[0] = 1;
+            buffer[0] = 0b1;
         if (s_pad_activated[CONFIG_RIGHT_CLICK_TOUCH_IO])
-            buffer[0] = 2;
+            buffer[0] = 0b10;
         if (s_pad_activated[CONFIG_LEFT_KEY_TOUCH_IO])
             buffer[1] -= 10;
         if (s_pad_activated[CONFIG_RIGHT_KEY_TOUCH_IO])
@@ -113,9 +112,10 @@ void bt_hid_task(void *pvParameters)
         if (s_pad_activated[CONFIG_DOWN_KEY_TOUCH_IO])
             buffer[2] += 10;
 
-        if (buffer[0] != 0 || buffer[1] != 0 || buffer[2] != 0 || buffer[3] != 0
-                || last_command_wasnt_empty)
+        bool is_current_command_empty = buffer[0] == 0 && buffer[1] == 0 && buffer[2] == 0 && buffer[3] == 0;
+        if (!is_current_command_empty || !was_last_command_empty)
             esp_hidd_dev_input_set(hid_dev, 0, 0, buffer, 4);
+        was_last_command_empty = is_current_command_empty;
 
         RESET_PAD_ACTIVATED
 
