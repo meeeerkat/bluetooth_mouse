@@ -99,6 +99,17 @@ void bt_hid_task(void *pvParameters)
     while (1) {
         uint8_t buffer[4] = {0};
 
+        /* buffer array description: see 
+         *  Device Class Definition for Human Interface Devices (HID)
+         *  Firmware Specification — 6/27/01
+         *  Version 1.11 (appendix B.2 is a good starting point)
+         *
+         * buffer[0] is for clicks:
+         *  first bit = 1 -> left click, second bit = 1 -> right click
+         * buffer[1] is for horizontal cursor movement
+         * buffer[2] is for vertical cursor movement
+         * buffer[3] is for the wheel (unsupported yet)
+         */
         if (s_pad_activated[CONFIG_LEFT_CLICK_TOUCH_IO])
             buffer[0] = 0b1;
         if (s_pad_activated[CONFIG_RIGHT_CLICK_TOUCH_IO])
@@ -113,6 +124,7 @@ void bt_hid_task(void *pvParameters)
             buffer[2] += 10;
 
         bool is_current_command_empty = buffer[0] == 0 && buffer[1] == 0 && buffer[2] == 0 && buffer[3] == 0;
+        // If last command wasn't empty, we need to send even empty commands to say the command is over
         if (!is_current_command_empty || !was_last_command_empty)
             esp_hidd_dev_input_set(hid_dev, 0, 0, buffer, 4);
         was_last_command_empty = is_current_command_empty;
