@@ -14,6 +14,16 @@
 #define TOUCH_THRESH_NO_USE   (0)
 #define TOUCHPAD_FILTER_TOUCH_PERIOD (10)
 
+#define TOUCH_IO_PIN_NB 6
+static uint8_t TOUCH_IO_PINS[TOUCH_IO_PIN_NB] = {
+    CONFIG_LEFT_CLICK_TOUCH_IO,
+    CONFIG_RIGHT_CLICK_TOUCH_IO,
+    CONFIG_LEFT_KEY_TOUCH_IO,
+    CONFIG_RIGHT_KEY_TOUCH_IO,
+    CONFIG_UP_KEY_TOUCH_IO,
+    CONFIG_DOWN_KEY_TOUCH_IO
+};
+
 static bool s_pad_activated[TOUCH_PAD_MAX];
 static uint32_t s_pad_init_val[TOUCH_PAD_MAX];
 
@@ -29,12 +39,12 @@ static uint32_t s_pad_init_val[TOUCH_PAD_MAX];
 static void init_touch_pad_thresholds(void)
 {
     uint16_t touch_value;
-    for (int i = 0; i < TOUCH_PAD_MAX; i++) {
+    for (int i = 0; i < TOUCH_IO_PIN_NB; i++) {
         //read filtered value
-        touch_pad_read_filtered(i, &touch_value);
-        s_pad_init_val[i] = touch_value;
+        touch_pad_read_filtered(TOUCH_IO_PINS[i], &touch_value);
+        s_pad_init_val[TOUCH_IO_PINS[i]] = touch_value;
         //set interrupt threshold.
-        ESP_ERROR_CHECK(touch_pad_set_thresh(i, touch_value * 2 / 3));
+        ESP_ERROR_CHECK(touch_pad_set_thresh(TOUCH_IO_PINS[i], touch_value * 2 / 3));
     }
 }
 
@@ -48,11 +58,9 @@ static void rtc_intr(void *arg)
     uint32_t pad_intr = touch_pad_get_status();
     //clear interrupt
     touch_pad_clear_status();
-    for (int i = 0; i < TOUCH_PAD_MAX; i++) {
-        if ((pad_intr >> i) & 0x01) {
-            s_pad_activated[i] = true;
-        }
-    }
+    for (int i = 0; i < TOUCH_IO_PIN_NB; i++)
+        if ((pad_intr >> TOUCH_IO_PINS[i]) & 0x01)
+            s_pad_activated[TOUCH_IO_PINS[i]] = true;
 }
 
 void init_inputs(void)
@@ -67,9 +75,9 @@ void init_inputs(void)
     touch_pad_set_voltage(TOUCH_HVOLT_2V7, TOUCH_LVOLT_0V5, TOUCH_HVOLT_ATTEN_1V);
 
     // Init touch pad IO
-    for (int i = 0; i < TOUCH_PAD_MAX; i++) {
+    for (int i = 0; i < TOUCH_IO_PIN_NB; i++) {
         //init RTC IO and mode for touch pad.
-        touch_pad_config(i, TOUCH_THRESH_NO_USE);
+        touch_pad_config(TOUCH_IO_PINS[i], TOUCH_THRESH_NO_USE);
     }
 
     // Initialize and start a software filter to detect slight change of capacitance.
@@ -84,8 +92,7 @@ void init_inputs(void)
     touch_pad_intr_enable();
 }
 
-#define RESET_BUFFER for (int i=0; i < 4; i++) buffer[i] = 0;
-#define RESET_PAD_ACTIVATED for (int i=0; i < TOUCH_PAD_MAX; i++) s_pad_activated[i] = false;
+#define RESET_PAD_ACTIVATED for (int i = 0; i < TOUCH_IO_PIN_NB; i++) s_pad_activated[TOUCH_IO_PINS[i]] = false;
 void bt_hid_task(void *pvParameters)
 {
     // first thing done is initialising touch_pad
