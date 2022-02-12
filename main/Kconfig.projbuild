@@ -1,4 +1,4 @@
-menu "Touch keys config"
+menu "Inputs config"
 
     config LEFT_CLICK_TOUCH_IO
         int "Left click TOUCH IO number"
@@ -30,8 +30,18 @@ menu "Touch keys config"
         range 0 9
         default 7
 
-    config REFRESH_INPUT_DELTA
-        int "Time between input refresh in ms"
+    config INPUT_MOVE_DELTA_MIN
+        int "Minimum cursor move at each refresh"
+        range 0 10000
+        default 10
+
+    config INPUT_MOVE_DELTA_MAX
+        int "Maximum cursor move at each refresh"
+        range 0 10000
+        default 100
+    
+    config INPUT_REFRESH_DELTA
+        int "Time between each input processing & refresh"
         range 0 1000
         default 50
 

@@ -3,10 +3,9 @@
 
 ### Current state
 Moving the cursor and clicking (right and left clicks) work right now
+Using a potentiometer on GPIO34 can set the cursor's speed (this adc input soon be configurable to another GPIO in config).
 
 ### TODO
-- Add click support (with release)
-- Add sensisivity support (with a potentiometer)
 - Add mouse wheel (with a potentiometer)
 
 ### Remarks
