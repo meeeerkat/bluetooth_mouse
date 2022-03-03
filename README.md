@@ -18,6 +18,7 @@ Using a potentiometer on GPIO34 can set the cursor's speed.
 
 
 ### TODO
+- Use FreeRTOS's Queues to make a cleaner and more efficient code
 - Add the GPIO for the cursor's speed potentiometer in the menuconfig
 - Add mouse wheel (with a potentiometer)
 - Separate the different parts of bt\_hid\_task
